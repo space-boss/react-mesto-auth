@@ -1,4 +1,5 @@
 import React from 'react';
+import { Route, Switch, useHistory, withRouter, Redirect } from 'react-router-dom';
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
@@ -9,6 +10,10 @@ import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
 import { apiConfig } from '../utils/api';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
+import ProtectedRoute from './ProtectedRoute';
+import Login from './Login';
+import Register from './Register';
+import { authApi} from '../utils/auth';
 
 
 function App() {
@@ -19,6 +24,29 @@ function App() {
   const [selectedCard, setSelectedCard] = React.useState({name: '', link: ''});
   const [currentUser, setCurrentUser] = React.useState({avatar: '', name: '', about: ''});
   const [cards, setCards] = React.useState([]);
+  const [isLoggedIn, setLoggedIn] = React.useState(false);
+  const [loginData, setLoginData] = React.useState({_id: '', email: ''});
+  const history = useHistory();
+
+
+
+  function handleRegister(data) {
+
+
+
+
+
+
+
+
+  }
+
+
+
+
+  
+
+
 
 
   React.useEffect(() => {
@@ -53,7 +81,6 @@ function App() {
       console.log(err);
     });
   }
-
  
   function handleCardLike(card) {
     const isLiked = card.likes.some(i => i._id === currentUser._id);
@@ -77,7 +104,6 @@ function App() {
       });
     }
   }
-
 
 
   function handleCardDelete(card) {
@@ -146,18 +172,35 @@ function App() {
   
 
   return (
+  
     <CurrentUserContext.Provider value={currentUser}>
       <div className = "page">
         <Header />
-        <Main 
-          onEditProfile = {handleEditProfileClick}
-          onEditAvatar = {handleEditAvatarClick}
-          onAddPlace = {handleAddPlaceClick}
-          onCardClick = {handleCardClick}
-          onCardLike = {handleCardLike}
-          onCardDelete = {handleCardDelete}
-          cards = {cards}
-        />
+
+        <Switch>
+          <Route path = "/sign-in">
+            <Login />
+          </Route>
+
+          <Route path = "/sign-up">
+            <Register />
+          </Route>
+
+          <ProtectedRoute 
+            exact path="/"
+            isLoggedIn = {isLoggedIn}
+            component = {Main}          
+            onEditProfile = {handleEditProfileClick}
+            onEditAvatar = {handleEditAvatarClick}
+            onAddPlace = {handleAddPlaceClick}
+            onCardClick = {handleCardClick}
+            onCardLike = {handleCardLike}
+            onCardDelete = {handleCardDelete}
+            cards = {cards}
+          />
+
+        </Switch>
+
         <Footer />
 
         <EditProfilePopup
@@ -197,3 +240,5 @@ function App() {
 }
 
 export default App;
+
+
