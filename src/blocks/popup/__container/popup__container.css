@@ -4,6 +4,8 @@
   width: 430px;
   height: 330px;
   margin: auto;
+  align-items: baseline;
+  justify-content: space-between;
 
 
   background: #FFFFFF;
@@ -20,3 +22,4 @@
     height: 220px;
   }
 }
+ 
