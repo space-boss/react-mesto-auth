@@ -1,11 +1,14 @@
 import React from 'react';
-import Header from '/Header';
+import Header from './Header';
+import { useHistory } from 'react-router-dom';
 
 
-function Login() {
+
+function Login(props) {
 
   const [email, setUserEmail] = React.useState('');
   const [password, setUserPassword] = React.useState('');
+  const history = useHistory();
 
   function handleEmailInput(evt) {
     setUserEmail(evt.target.value)
@@ -21,7 +24,7 @@ function Login() {
       email,
       password
     }
-    handleSubmit(userData)
+    props.handleSubmit(userData)
   }
 
   function handleRedirect() {
@@ -31,8 +34,11 @@ function Login() {
 
   return(
     <>
-    <Header button="Регистрация" onClick={handleRedirect} />
-
+    <Header 
+    button="Регистрация"
+    onClick={handleRedirect} 
+    email = {props.email}/>
+ 
     <section className="auth">
       <div className="auth__container">
         <h3 className="auth__title">Вход</h3>
@@ -62,7 +68,7 @@ function Login() {
             minLength="8" 
             maxLength="40"/>
 
-            <input name="submit" type="submit" value="Сохранить" className="auth__submit-button"/>
+            <input name="submit" type="submit" value="Войти" className="auth__submit-button"/>
           </form> 
         </div>
     </section>

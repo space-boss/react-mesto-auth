@@ -1,6 +1,5 @@
 import React from 'react';
-import { Route, Switch, useHistory, withRouter, Redirect } from 'react-router-dom';
-import Header from './Header';
+import { Route, Switch, useHistory, Redirect } from 'react-router-dom';
 import Main from './Main';
 import Footer from './Footer';
 import PopupWithForm from './PopupWithForm';
@@ -25,28 +24,62 @@ function App() {
   const [currentUser, setCurrentUser] = React.useState({avatar: '', name: '', about: ''});
   const [cards, setCards] = React.useState([]);
   const [isLoggedIn, setLoggedIn] = React.useState(false);
-  const [loginData, setLoginData] = React.useState({_id: '', email: ''});
+  const [isRegistered, setIsRegistered] = React.useState(false);
+  const [email, setEmail] = React.useState('');
   const history = useHistory();
 
 
 
-  function handleRegister(data) {
-
-
-
-
-
-
-
-
+  function handleRegistration(data) {
+    authApi.registerUser(data.email, data.password)
+    .then((res) => {
+      if (res.ok) {
+        setIsRegistered(true);
+      } else {
+        return {
+          message: "Ой. Не получилось."
+        };
+      }
+    }).catch((err) => console.log(err))
   }
 
+  function redirectAfterAuth() {
+    if (isRegistered) {
+      history.push("/sign-in");
+    }
+  }
 
+  function handleLogin(data) {
+    authApi.authorizeUser(data.email, data.password)
+    .then((data) => {
+      console.log(data.token);
+      if (data.token) {
+        history.push("/main")
+      }
+    }).catch((err) => console.log(err));
+    setLoggedIn(true);
+    setEmail(data.email)
+  }
 
+  function tokenCheck() {
+    const token = localStorage.getItem("token");
+    if (token) {
+      authApi.getUserData(token)
+      .then((res) => {
+        if (res) {
+        setLoggedIn(true);
+        setEmail(res.data.email);
+        history.push("/main");
+        }
+      }).catch((err) => console.log(err))
+    }
+  }
 
-  
-
-
+  React.useEffect(() => {
+    if (isLoggedIn) {
+      history.push("/main");
+    }
+  }, [isLoggedIn, history]);
 
 
   React.useEffect(() => {
@@ -68,7 +101,12 @@ function App() {
     .catch((err) => {
       console.log(err);
     });
-  }, [])
+  }, []);
+  
+
+  /*React.useEffect(() => {
+    tokenCheck();
+  }, []); */
 
 
   function handleAddPlaceSubmit(data) {
@@ -175,19 +213,29 @@ function App() {
   
     <CurrentUserContext.Provider value={currentUser}>
       <div className = "page">
-        <Header />
 
         <Switch>
+          <Route exact path="/">
+            {isLoggedIn ? <Redirect to="/main" /> : <Redirect to="/signup" />}
+          </Route>
+
           <Route path = "/sign-in">
-            <Login />
+            <Login   
+              handleSubmit = {handleLogin}
+              email = {email}
+              isRegistered = {isRegistered}
+              redirectAfterAuth = {redirectAfterAuth}
+            />
           </Route>
 
           <Route path = "/sign-up">
-            <Register />
+            <Register
+              handleSubmit = {handleRegistration}
+              redirectAfterAuth = {redirectAfterAuth} />
           </Route>
 
           <ProtectedRoute 
-            exact path="/"
+            path="/main"
             isLoggedIn = {isLoggedIn}
             component = {Main}          
             onEditProfile = {handleEditProfileClick}
@@ -197,6 +245,7 @@ function App() {
             onCardLike = {handleCardLike}
             onCardDelete = {handleCardDelete}
             cards = {cards}
+            email = {email}
           />
 
         </Switch>

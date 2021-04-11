@@ -1,6 +1,7 @@
 import React from 'react';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
 import Card from './Card'; 
+import Header from './Header';
 
 function Main(props) {
 
@@ -8,6 +9,13 @@ function Main(props) {
 
   return (
     <main className="content">
+      <Header
+        button="Выйти"
+        onClick = {props.onClick}
+        isLoggedIn = {props.isLoggedIn}
+        email={props.email}
+      />
+
       <section className="profile">
         <div 
           onClick={props.onEditAvatar}
