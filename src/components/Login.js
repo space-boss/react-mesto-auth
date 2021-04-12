@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 
 
 
-function Login(props) {
+function Login({ onLogin, onRegister }) {
 
   const [email, setUserEmail] = React.useState('');
   const [password, setUserPassword] = React.useState('');
@@ -24,7 +24,7 @@ function Login(props) {
       email,
       password
     }
-    props.handleSubmit(userData)
+    onLogin(userData)
   }
 
   function handleRedirect() {
@@ -37,7 +37,7 @@ function Login(props) {
     <Header 
     button="Регистрация"
     onClick={handleRedirect} 
-    email = {props.email}/>
+    />
  
     <section className="auth">
       <div className="auth__container">

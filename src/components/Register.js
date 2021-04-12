@@ -3,7 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import Header from './Header';
 
 
-function Register(props) {
+function Register({onRegister}) {
 
   const [email, setUserEmail] = React.useState('');
   const [password, setUserPassword] = React.useState('');
@@ -19,7 +19,7 @@ function Register(props) {
 
   function handleFormSubmit(evt) {
     evt.preventDefault(); 
-    props.handleSubmit({
+    onRegister({
       password: password,
       email: email
     })

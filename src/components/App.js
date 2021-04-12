@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Route, Switch, useHistory, Redirect } from 'react-router-dom';
 import Main from './Main';
 import Footer from './Footer';
@@ -13,6 +13,8 @@ import ProtectedRoute from './ProtectedRoute';
 import Login from './Login';
 import Register from './Register';
 import { authApi} from '../utils/auth';
+import InfoTooltip from './InfoTooltip';
+
 
 
 function App() {
@@ -26,60 +28,74 @@ function App() {
   const [isLoggedIn, setLoggedIn] = React.useState(false);
   const [isRegistered, setIsRegistered] = React.useState(false);
   const [email, setEmail] = React.useState('');
+
+  const [isInfoTooltipOpen, setInfoTooltipOpen] = React.useState(false);
+  const [responseCode, setResponseCode] = React.useState(0);
   const history = useHistory();
 
-
-
-  function handleRegistration(data) {
-    authApi.registerUser(data.email, data.password)
-    .then((res) => {
-      if (res.ok) {
-        setIsRegistered(true);
-      } else {
-        return {
-          message: "Ой. Не получилось."
-        };
-      }
-    }).catch((err) => console.log(err))
-  }
-
-  function redirectAfterAuth() {
-    if (isRegistered) {
-      history.push("/sign-in");
-    }
-  }
-
-  function handleLogin(data) {
-    authApi.authorizeUser(data.email, data.password)
-    .then((data) => {
-      console.log(data.token);
-      if (data.token) {
-        history.push("/main")
-      }
-    }).catch((err) => console.log(err));
-    setLoggedIn(true);
-    setEmail(data.email)
-  }
-
-  function tokenCheck() {
-    const token = localStorage.getItem("token");
-    if (token) {
-      authApi.getUserData(token)
-      .then((res) => {
-        if (res) {
-        setLoggedIn(true);
-        setEmail(res.data.email);
-        history.push("/main");
-        }
-      }).catch((err) => console.log(err))
-    }
-  }
 
   React.useEffect(() => {
     if (isLoggedIn) {
       history.push("/main");
     }
   }, [isLoggedIn, history]);
+
+
+  useEffect(() => {
+    tokenCheck()
+  });
+   
+  
+  useEffect(() => {
+    if(isRegistered) {
+      history.push('/sign-in');
+    }
+  }, [isRegistered, history])
+
+
+  const handleLogin = ({ email, password }) => {
+    return authApi.authorize(email, password)
+      .then((data) => {
+        if (!data) throw new Error('Неверные имя пользователя или пароль')
+        if (data.token) {
+          setLoggedIn(true)
+          localStorage.setItem('token', data.token)
+          return;
+        }
+      })
+  }
+
+
+  const handleRegister = ({ email, password}) => {
+    console.log({ email, password })
+    return authApi.register(email, password).then((res) => {
+      setResponseCode(res.statusCode);
+      if (!res || res.statusCode === 400) throw new Error('Что-то пошло не так');
+      setIsRegistered(true)
+      return res;
+    }).catch((err) => {
+      console.log(err);
+    });
+  }
+
+
+  const tokenCheck = () => {
+    if (localStorage.getItem('token')) {
+      let token = localStorage.getItem('token');
+      authApi.getContent(token).then(({ data }) => {
+        if (data.email) {
+          setLoggedIn(true);
+          setEmail(data.email);
+        }
+        console.log(data.email);
+      });
+    }
+  }
+
+  
+  function onRegisterPopup() {
+    setInfoTooltipOpen(true);
+  }
 
 
   React.useEffect(() => {
@@ -103,11 +119,6 @@ function App() {
     });
   }, []);
   
-
-  /*React.useEffect(() => {
-    tokenCheck();
-  }, []); */
-
 
   function handleAddPlaceSubmit(data) {
     apiConfig.postCard(data)
@@ -199,6 +210,7 @@ function App() {
     toggleEditProfilePopup(false);
     toggleZoomImagePopup(false);
     setSelectedCard({name: '', link: ''});
+    setInfoTooltipOpen(false);
   }
 
   function handleCardClick(card) {
@@ -216,22 +228,22 @@ function App() {
 
         <Switch>
           <Route exact path="/">
-            {isLoggedIn ? <Redirect to="/main" /> : <Redirect to="/signup" />}
+            {isLoggedIn ? <Redirect to="/main" /> : <Redirect to="/sign-up" />}
           </Route>
 
           <Route path = "/sign-in">
             <Login   
-              handleSubmit = {handleLogin}
-              email = {email}
+              onLogin = {handleLogin}
               isRegistered = {isRegistered}
-              redirectAfterAuth = {redirectAfterAuth}
+              onRegisterPopup = {onRegisterPopup}
             />
           </Route>
 
           <Route path = "/sign-up">
             <Register
-              handleSubmit = {handleRegistration}
-              redirectAfterAuth = {redirectAfterAuth} />
+              onRegister = {handleRegister}
+              onRegisterPopup = {onRegisterPopup}
+            />
           </Route>
 
           <ProtectedRoute 
@@ -251,6 +263,13 @@ function App() {
         </Switch>
 
         <Footer />
+
+        <InfoTooltip 
+          isOpen = {isInfoTooltipOpen}
+          onClose = {closeAllPopups}
+          responseCode = {responseCode}
+        /> 
+
 
         <EditProfilePopup
           isOpen = {isEditProfilePopupOpen}

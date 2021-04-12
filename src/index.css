@@ -21,6 +21,9 @@
 @import url(./blocks/popup/__img/popup__img.css);
 @import url(./blocks/popup/__caption/popup__caption.css);
 
+@import url(./blocks/popup/__img-auth-feedback/popup__img-auth-feedback.css);
+@import url(./blocks/popup/__title/_centered/popup__title_centered.css);
+
 @import url(./blocks/header/header.css);
 @import url(./blocks/header/__logo/header__logo.css);
 @import url(./blocks/header/__infobox/header__infobox.css);
