@@ -3,7 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import Header from './Header';
 
 
-function Register({onRegister}) {
+function Register({onRegister, onRegisterPopup}) {
 
   const [email, setUserEmail] = React.useState('');
   const [password, setUserPassword] = React.useState('');
@@ -23,6 +23,7 @@ function Register({onRegister}) {
       password: password,
       email: email
     })
+    onRegisterPopup();
   }
 
   function handleRedirect() {

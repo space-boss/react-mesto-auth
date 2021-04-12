@@ -1,6 +1,4 @@
 import React from 'react';
-import Success from '../images/registration-ok.svg';
-import Fail from '../images/registration-fail.svg';
 
 
 function InfoTooltip(props) {
@@ -16,13 +14,11 @@ function InfoTooltip(props) {
 
           <img 
           className="popup__img-auth-feedback"
-          src={props.responseCode === 201 ? Success : Fail}
+          src={props.src}
           alt ='Статус авторизации'/>
 
           <h3 className="popup__title popup__title_centered">
-            {props.divresponseCode === 201
-            ? 'Вы успешно зарегистрировались!'
-            : 'Что-то пошло не так! Попробуйте ещё раз.'}</h3>
+            {props.title}</h3>
         </div>
     </div>
   )
