@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import Header from '/Header';
+import Header from './Header';
 
 
-function Register(props) {
+function Register({onRegister}) {
 
   const [email, setUserEmail] = React.useState('');
   const [password, setUserPassword] = React.useState('');
@@ -19,7 +19,7 @@ function Register(props) {
 
   function handleFormSubmit(evt) {
     evt.preventDefault(); 
-    props.handleSubmit({
+    onRegister({
       password: password,
       email: email
     })
@@ -61,11 +61,11 @@ function Register(props) {
             required minLength="8"
             maxLength="40"/>
 
-            <input name="submit" type="submit" value="Сохранить" className="auth__submit-button"/>
+            <input name="submit" type="submit" value="Зарегистрироаться" className="auth__submit-button"/>
           </form> 
-      </div>
-      <div classname="auth__signin">
-        <Link to="/signin" className="auth__signin-link"> Уже зарегистрированы?Войти </Link>
+          <div className="auth__signin">
+            <Link to="/sign-in" className="auth__signin-link"> Уже зарегистрированы? Войти </Link>
+          </div>
       </div>
 
     </section> 

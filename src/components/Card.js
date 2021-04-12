@@ -7,11 +7,11 @@ function Card(props) {
   const isLiked = props.card.likes.some(i => i._id === currentUser._id);
 
 
-  const cardDeleteButtonClassName = (
+  const cardDeleteButtonclassName = (
     `place__delete ${isOwn ? 'place__delete_shown' : ''}`
   ); 
 
-  const cardLikeButtonClassName = (
+  const cardLikeButtonclassName = (
     `place__like ${isLiked ? 'place__like_pressed' : ''}`
   )
 
@@ -32,7 +32,7 @@ function Card(props) {
       <button 
         type="button"
         onClick={handleDeleteClick}
-        className={cardDeleteButtonClassName}  
+        className={cardDeleteButtonclassName}  
         aria-label="Удалить элемeнт"></button>
       <button 
         onClick={handleClick}
@@ -46,7 +46,7 @@ function Card(props) {
         <button 
           type="button"
           onClick={handleLikeClick} 
-          className={cardLikeButtonClassName} 
+          className={cardLikeButtonclassName} 
           aria-label="Добавить в избранное"></button>
         <p className="place__like-count">{props.card.likes.length}</p>
       </div> 

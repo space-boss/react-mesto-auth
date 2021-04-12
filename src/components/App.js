@@ -1,6 +1,5 @@
-import React from 'react';
-import { Route, Switch, useHistory, withRouter, Redirect } from 'react-router-dom';
-import Header from './Header';
+import React, {useEffect} from 'react';
+import { Route, Switch, useHistory, Redirect } from 'react-router-dom';
 import Main from './Main';
 import Footer from './Footer';
 import PopupWithForm from './PopupWithForm';
@@ -14,6 +13,8 @@ import ProtectedRoute from './ProtectedRoute';
 import Login from './Login';
 import Register from './Register';
 import { authApi} from '../utils/auth';
+import InfoTooltip from './InfoTooltip';
+
 
 
 function App() {
@@ -25,28 +26,76 @@ function App() {
   const [currentUser, setCurrentUser] = React.useState({avatar: '', name: '', about: ''});
   const [cards, setCards] = React.useState([]);
   const [isLoggedIn, setLoggedIn] = React.useState(false);
-  const [loginData, setLoginData] = React.useState({_id: '', email: ''});
+  const [isRegistered, setIsRegistered] = React.useState(false);
+  const [email, setEmail] = React.useState('');
+
+  const [isInfoTooltipOpen, setInfoTooltipOpen] = React.useState(false);
+  const [responseCode, setResponseCode] = React.useState(0);
   const history = useHistory();
 
 
-
-  function handleRegister(data) {
-
-
-
-
-
+  React.useEffect(() => {
+    if (isLoggedIn) {
+      history.push("/main");
+    }
+  }, [isLoggedIn, history]);
 
 
+  useEffect(() => {
+    tokenCheck()
+  });
+   
+  
+  useEffect(() => {
+    if(isRegistered) {
+      history.push('/sign-in');
+    }
+  }, [isRegistered, history])
 
+
+  const handleLogin = ({ email, password }) => {
+    return authApi.authorize(email, password)
+      .then((data) => {
+        if (!data) throw new Error('Неверные имя пользователя или пароль')
+        if (data.token) {
+          setLoggedIn(true)
+          localStorage.setItem('token', data.token)
+          return;
+        }
+      })
   }
 
 
+  const handleRegister = ({ email, password}) => {
+    console.log({ email, password })
+    return authApi.register(email, password).then((res) => {
+      setResponseCode(res.statusCode);
+      if (!res || res.statusCode === 400) throw new Error('Что-то пошло не так');
+      setIsRegistered(true)
+      return res;
+    }).catch((err) => {
+      console.log(err);
+    });
+  }
 
+
+  const tokenCheck = () => {
+    if (localStorage.getItem('token')) {
+      let token = localStorage.getItem('token');
+      authApi.getContent(token).then(({ data }) => {
+        if (data.email) {
+          setLoggedIn(true);
+          setEmail(data.email);
+        }
+        console.log(data.email);
+      });
+    }
+  }
 
   
-
-
+  function onRegisterPopup() {
+    setInfoTooltipOpen(true);
+  }
 
 
   React.useEffect(() => {
@@ -68,8 +117,8 @@ function App() {
     .catch((err) => {
       console.log(err);
     });
-  }, [])
-
+  }, []);
+  
 
   function handleAddPlaceSubmit(data) {
     apiConfig.postCard(data)
@@ -161,6 +210,7 @@ function App() {
     toggleEditProfilePopup(false);
     toggleZoomImagePopup(false);
     setSelectedCard({name: '', link: ''});
+    setInfoTooltipOpen(false);
   }
 
   function handleCardClick(card) {
@@ -175,19 +225,29 @@ function App() {
   
     <CurrentUserContext.Provider value={currentUser}>
       <div className = "page">
-        <Header />
 
         <Switch>
+          <Route exact path="/">
+            {isLoggedIn ? <Redirect to="/main" /> : <Redirect to="/sign-up" />}
+          </Route>
+
           <Route path = "/sign-in">
-            <Login />
+            <Login   
+              onLogin = {handleLogin}
+              isRegistered = {isRegistered}
+              onRegisterPopup = {onRegisterPopup}
+            />
           </Route>
 
           <Route path = "/sign-up">
-            <Register />
+            <Register
+              onRegister = {handleRegister}
+              onRegisterPopup = {onRegisterPopup}
+            />
           </Route>
 
           <ProtectedRoute 
-            exact path="/"
+            path="/main"
             isLoggedIn = {isLoggedIn}
             component = {Main}          
             onEditProfile = {handleEditProfileClick}
@@ -197,11 +257,19 @@ function App() {
             onCardLike = {handleCardLike}
             onCardDelete = {handleCardDelete}
             cards = {cards}
+            email = {email}
           />
 
         </Switch>
 
         <Footer />
+
+        <InfoTooltip 
+          isOpen = {isInfoTooltipOpen}
+          onClose = {closeAllPopups}
+          responseCode = {responseCode}
+        /> 
+
 
         <EditProfilePopup
           isOpen = {isEditProfilePopupOpen}
