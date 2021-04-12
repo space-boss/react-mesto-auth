@@ -38,7 +38,7 @@ function App() {
   React.useEffect(() => {
     if (isLoggedIn) {
       history.push("/main");
-    }F
+    }
   }, [isLoggedIn, history]);
 
 
