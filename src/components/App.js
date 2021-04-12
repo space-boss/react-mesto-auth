@@ -14,6 +14,8 @@ import Login from './Login';
 import Register from './Register';
 import { authApi} from '../utils/auth';
 import InfoTooltip from './InfoTooltip';
+import SuccessImg from '../images/registration-ok.svg';
+import FailImg from '../images/registration-fail.svg';
 
 
 
@@ -30,14 +32,13 @@ function App() {
   const [email, setEmail] = React.useState('');
 
   const [isInfoTooltipOpen, setInfoTooltipOpen] = React.useState(false);
-  const [responseCode, setResponseCode] = React.useState(0);
   const history = useHistory();
 
 
   React.useEffect(() => {
     if (isLoggedIn) {
       history.push("/main");
-    }
+    }F
   }, [isLoggedIn, history]);
 
 
@@ -47,7 +48,8 @@ function App() {
    
   
   useEffect(() => {
-    if(isRegistered) {
+    setInfoTooltipOpen(false);
+    if (isRegistered) {
       history.push('/sign-in');
     }
   }, [isRegistered, history])
@@ -67,11 +69,11 @@ function App() {
 
 
   const handleRegister = ({ email, password}) => {
-    console.log({ email, password })
-    return authApi.register(email, password).then((res) => {
-      setResponseCode(res.statusCode);
+    return authApi.register(email, password)
+    .then((res) => {
       if (!res || res.statusCode === 400) throw new Error('Что-то пошло не так');
-      setIsRegistered(true)
+      setIsRegistered(true);
+      setInfoTooltipOpen(true)
       return res;
     }).catch((err) => {
       console.log(err);
@@ -90,6 +92,11 @@ function App() {
         console.log(data.email);
       });
     }
+  }
+
+  function signOut() {
+    localStorage.removeItem('token');
+    setLoggedIn(false);
   }
 
   
@@ -235,6 +242,7 @@ function App() {
             <Login   
               onLogin = {handleLogin}
               isRegistered = {isRegistered}
+              isInfoTooltipOpen = {isInfoTooltipOpen}
               onRegisterPopup = {onRegisterPopup}
             />
           </Route>
@@ -258,6 +266,7 @@ function App() {
             onCardDelete = {handleCardDelete}
             cards = {cards}
             email = {email}
+            onClick = {signOut}
           />
 
         </Switch>
@@ -267,7 +276,11 @@ function App() {
         <InfoTooltip 
           isOpen = {isInfoTooltipOpen}
           onClose = {closeAllPopups}
-          responseCode = {responseCode}
+          title = {
+            isRegistered ? 'Вы успешно зарегистрировались!'
+            : 'Что-то пошло не так! Попробуйте ещё раз.'
+          }
+          src={isRegistered ? SuccessImg : FailImg}
         /> 
 
 
