@@ -1,4 +1,4 @@
-# MESTO AUTHNTIFICATION. Student project for Yandex.Praktikum
+# MESTO AUTHENTIFICATION. Student project for Yandex.Praktikum
 
 ### Description
 This projects builds upon the functionality of the [Mesto React project](https://github.com/space-boss/mesto-react) and adds the functionality of authentification and authorization to it. 
